@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	cp "github.com/otiai10/copy"
 )
 
 const (
@@ -26,4 +28,8 @@ func (is *Installer) Copy(dest, src string) error {
 	}
 
 	return nil
+}
+
+func (is *Installer) CopyDir(dest, src string) error {
+	return cp.Copy(src, dest)
 }

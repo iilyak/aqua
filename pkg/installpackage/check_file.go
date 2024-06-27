@@ -14,11 +14,8 @@ import (
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
 )
 
-func (is *Installer) checkFilesWrap(ctx context.Context, logE *logrus.Entry, param *ParamInstallPackage, pkgPath string) error {
-	pkg := param.Pkg
+func (is *Installer) CheckAndCopyFiles(ctx context.Context, pkg *config.Package, logE *logrus.Entry) (bool, error) {
 	pkgInfo := pkg.PackageInfo
-
-	failed := false
 	notFound := false
 	for _, file := range pkgInfo.GetFiles() {
 		logE := logE.WithField("file_name", file.Name)
@@ -26,12 +23,20 @@ func (is *Installer) checkFilesWrap(ctx context.Context, logE *logrus.Entry, par
 		if err := is.checkAndCopyFile(ctx, pkg, file, logE); err != nil {
 			if errors.As(err, &errFileNotFound) {
 				notFound = true
+			} else {
+				return notFound, fmt.Errorf("check file_src is correct: %w", err)
 			}
-			failed = true
-			logerr.WithError(logE, err).Error("check file_src is correct")
 		}
 	}
-	if notFound { //nolint:nestif
+	return !notFound, nil
+}
+
+func (is *Installer) checkFilesWrap(ctx context.Context, logE *logrus.Entry, param *ParamInstallPackage, pkgPath string) error {
+	pkg := param.Pkg
+
+	isFound, checkErr := is.CheckAndCopyFiles(ctx, pkg, logE)
+
+	if !isFound { //nolint:nestif
 		paths, err := is.walk(pkgPath)
 		if err != nil {
 			logerr.WithError(logE, err).Warn("traverse the content of unarchived package")
@@ -43,7 +48,7 @@ func (is *Installer) checkFilesWrap(ctx context.Context, logE *logrus.Entry, par
 			}
 		}
 	}
-	if failed {
+	if checkErr != nil {
 		return errors.New("check file_src is correct")
 	}
 

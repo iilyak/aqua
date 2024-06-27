@@ -17,6 +17,12 @@ type File struct {
 	Dir  string `json:"dir,omitempty" yaml:",omitempty"`
 }
 
+type Directory struct {
+	Name string `validate:"required" json:"name,omitempty" yaml:",omitempty"`
+	Src  string `json:"src,omitempty" yaml:",omitempty"`
+	Dst  string `json:"dst,omitempty" yaml:",omitempty"`
+}
+
 func (p *PackageInfos) ToMap(logE *logrus.Entry) map[string]*PackageInfo {
 	return p.toMap(logE, logrus.DebugLevel)
 }

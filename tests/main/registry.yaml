@@ -152,3 +152,15 @@ packages:
       - name: github-comment
         src: ./cmd/github-comment
         dir: github-comment-{{trimV .Version}}
+
+  - name: lua/lua
+    type: http
+    repo_owner: Lua.org
+    repo_name: lua
+    url: https://www.lua.org/ftp/lua-{{trimV .Version}}.tar.gz
+    description: Lua is a lightweight, high-level, multi-paradigm programming language
+    format: tar.gz
+    directories:
+      - name: lua
+        src: lua-{{trimV .Version}}
+        dst: lua-src
