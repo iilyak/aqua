@@ -176,6 +176,29 @@ func (p *Package) renderSrc(assetName string, file *registry.File, rt *runtime.R
 	return filepath.FromSlash(s), nil // FromSlash is needed for Windows. https://github.com/aquaproj/aqua/issues/2013
 }
 
+func (p *Package) renderDirectory(assetName string, dir *registry.Directory, rt *runtime.Runtime) (string, error) {
+	pkg := p.Package
+	pkgInfo := p.PackageInfo
+	format := pkgInfo.GetFormat()
+	assetWithoutExt, _ := asset.RemoveExtFromAsset(assetName)
+	s, err := template.Execute(dir.Src, map[string]interface{}{
+		"Version":         pkg.Version,
+		"SemVer":          p.semVer(),
+		"GOOS":            rt.GOOS,
+		"GOARCH":          rt.GOARCH,
+		"OS":              replace(rt.GOOS, pkgInfo.Replacements),
+		"Arch":            getArch(pkgInfo.Rosetta2, pkgInfo.WindowsARMEmulation, pkgInfo.Replacements, rt),
+		"Format":          format,
+		"DirectoryName":   dir.Name,
+		"Asset":           assetName,
+		"AssetWithoutExt": assetWithoutExt,
+	})
+	if err != nil {
+		return "", err //nolint:wrapcheck
+	}
+	return filepath.FromSlash(s), nil // FromSlash is needed for Windows. https://github.com/aquaproj/aqua/issues/2013
+}
+
 func replace(key string, replacements registry.Replacements) string {
 	a := replacements[key]
 	if a == "" {
@@ -205,6 +228,25 @@ func (p *Package) fileSrc(file *registry.File, rt *runtime.Runtime) (string, err
 		return s, nil
 	}
 	return p.completeWindowsExtToFileSrc(s), nil
+}
+
+func (p *Package) DirectorySrc(dir *registry.Directory, rt *runtime.Runtime) (string, error) {
+	pkgInfo := p.PackageInfo
+	assetName, err := p.RenderAsset(rt)
+	if err != nil {
+		return "", fmt.Errorf("render the asset name: %w", err)
+	}
+	if unarchive.IsUnarchived(pkgInfo.GetFormat(), assetName) {
+		return filepath.Base(assetName), nil
+	}
+	if dir.Src == "" {
+		return dir.Name, nil
+	}
+	src, err := p.renderDirectory(assetName, dir, rt)
+	if err != nil {
+		return "", fmt.Errorf("render the template dir.src: %w", err)
+	}
+	return src, nil
 }
 
 func (p *Package) fileSrcWithoutWindowsExt(file *registry.File, rt *runtime.Runtime) (string, error) {

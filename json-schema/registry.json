@@ -198,6 +198,21 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "Directory": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "src": {
+          "type": "string"
+        },
+        "dst": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "FormatOverride": {
       "properties": {
         "goos": {

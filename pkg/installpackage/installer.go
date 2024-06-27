@@ -256,5 +256,13 @@ func (is *Installer) InstallPackage(ctx context.Context, logE *logrus.Entry, par
 		return err
 	}
 
-	return is.checkFilesWrap(ctx, logE, param, pkgPath)
+	if len(pkg.PackageInfo.Directories) > 0 {
+		_, err := is.CheckAndCopyFiles(ctx, pkg, logE)
+		if err != nil {
+			return err
+		}
+		return is.checkAndCopyDirectories(ctx, pkg, logE)
+	} else {
+		return is.checkFilesWrap(ctx, logE, param, pkgPath)
+	}
 }

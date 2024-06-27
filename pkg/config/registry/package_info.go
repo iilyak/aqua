@@ -51,6 +51,7 @@ type PackageInfo struct {
 	Overrides           []*Override        `json:"overrides,omitempty" yaml:",omitempty"`
 	FormatOverrides     []*FormatOverride  `yaml:"format_overrides,omitempty" json:"format_overrides,omitempty"`
 	Files               []*File            `json:"files,omitempty" yaml:",omitempty"`
+	Directories         []*Directory       `yaml:",omitempty" json:"directories,omitempty"`
 	Replacements        Replacements       `json:"replacements,omitempty" yaml:",omitempty"`
 	SupportedEnvs       SupportedEnvs      `yaml:"supported_envs,omitempty" json:"supported_envs,omitempty"`
 	Checksum            *Checksum          `json:"checksum,omitempty"`
